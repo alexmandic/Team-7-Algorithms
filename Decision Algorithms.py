@@ -1,5 +1,6 @@
 import numpy as np
 
+#Returns the probabilities for the defender
 def defen_probs(k, distances, values):
     nes_sum = 0
     for j in range(k):
@@ -14,6 +15,7 @@ def defen_probs(k, distances, values):
     
     return probabilities
 
+#Returns the probabilities for the attacker
 def attac_probs(k, distances, values):    
     nes_sum = 0
     for j in range(k):
@@ -25,6 +27,7 @@ def attac_probs(k, distances, values):
 
     return probabilities
 
+#Determines the value of k (and the number of points with non-zero probability)
 def k_finder(distances, values):
     k = len(distances)
 
@@ -38,7 +41,7 @@ def k_finder(distances, values):
     return k
 
 ###############################################################################
-    
+#Code for inputs of Defender    
 max_length = 10
 
 node_order_D = [9,10,11]
@@ -68,7 +71,7 @@ p = p/np.sum(p)
 print(np.random.choice(node_order_D[0:k_val_D], p=p))
 
 ###############################################################################
-
+#Code for inputs of Attacker
 node_order_A = [1,2,3,4,5]
 
 vals_temp_A = [2000,3500,6000,10000,8000]
