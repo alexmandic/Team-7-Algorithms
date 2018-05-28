@@ -46,9 +46,11 @@ def attac_probs(k, distances, values):
 
 ###############################################################################
     
-xLen = 10
-yLen = 10
-numNods = 4
+xLen = 100
+yLen = 100
+numNods = 15
+minValue = 10
+maxValue = 40
 
 defLoc = [rng.randint(0,xLen),rng.randint(0,yLen)]
 attLoc = [rng.randint(0,xLen),rng.randint(0,yLen)]
@@ -61,7 +63,7 @@ for i in range(numNods):
     nodLocsX.append(rng.randint(0,xLen))
     nodLocsY.append(rng.randint(0,yLen))
     nodNames.append(i)
-    weiVals.append(round((rng.random()*80)+20,2))
+    weiVals.append(round((rng.random()*(maxValue-minValue))+minValue,2))
     
 #randomly generated nodes assumed to be in decreasing value order
 weiVals.sort()    
@@ -71,23 +73,75 @@ nodLocs = []
 for j in range(numNods):
     nodLocs.append([nodLocsX[j],nodLocsY[j]])
 
-while 1:
-    plt.plot(defLoc[0],defLoc[1],'bo',attLoc[0],attLoc[1],'ro',nodLocsX,nodLocsY,'ko')
+gameOn = 1
 
+plt.axis([0.0,xLen, 0.0,yLen])
+ax = plt.gca()
+ax.set_autoscale_on(False)
+plt.plot(nodLocsX,nodLocsY,'ko',defLoc[0],defLoc[1],'bx',attLoc[0],attLoc[1],'rx')
+plt.show()
+
+while gameOn:
     defDis = []
     attDis = []
 
     for k in range(numNods):
-        defDis.append(abs(defLoc[0]-nodLocsX[k])+abs(defLoc[1]-nodLocsY[k]))
-        attDis.append(abs(attLoc[0]-nodLocsX[k])+abs(attLoc[1]-nodLocsY[k]))
+        newDefDis = abs(defLoc[0]-nodLocsX[k])+abs(defLoc[1]-nodLocsY[k])
+        newAttDis = abs(attLoc[0]-nodLocsX[k])+abs(attLoc[1]-nodLocsY[k])
         
-    attK = k_finder(defDis,weiVals) 
+        if newDefDis != 0:
+            defDis.append(newDefDis)
+        else:
+            defDis.append(1)
+
+        if newAttDis != 0:
+            attDis.append(newAttDis)
+        else:
+            attDis.append(1)        
+        
+    attK = k_finder(attDis,weiVals) 
     defK = k_finder(defDis,weiVals)
     
     attP = attac_probs(attK,attDis,weiVals)
     attP = attP/np.sum(attP)
     attNew = np.random.choice(nodNames[0:attK], p=attP)
-    attLoc[0] = nodLocsX[attNew]
-    attLoc[1] = nodLocsY[attNew]
-    #CURRENT PROBLEM IS THAT ONCE YOU'RE IN THE SAME PLACE AS A NODE, YOU ARE DIVIDING BY A DISTANCE OF 0
-    #NEED TO ADD IN SIMILAR LINES FOR DEF ONCE ATT IS WORKING
+
+    if attLoc[0] > nodLocsX[attNew]:
+        attLoc[0] -= 1
+    elif attLoc[0] < nodLocsX[attNew]:
+        attLoc[0] += 1
+        
+    if attLoc[1] > nodLocsY[attNew]:
+        attLoc[1] -= 1
+    elif attLoc[1] < nodLocsY[attNew]:
+        attLoc[1] += 1        
+    
+    defP = defen_probs(defK,defDis,weiVals)
+    defP = defP/np.sum(defP)
+    defNew = np.random.choice(nodNames[0:defK], p=defP)
+    
+    if defLoc[0] > nodLocsX[defNew]:
+        defLoc[0] -= 1
+    elif defLoc[0] < nodLocsX[defNew]:
+        defLoc[0] += 1
+        
+    if defLoc[1] > nodLocsY[defNew]:
+        defLoc[1] -= 1
+    elif defLoc[1] < nodLocsY[defNew]:
+        defLoc[1] += 1        
+        
+    if attLoc[0] == defLoc[0] and attLoc[1] == defLoc[1]:
+        gameOn = 0
+    
+    if attLoc[0] == nodLocsX[attNew] and attLoc[1] == nodLocsY[attNew] and gameOn == 1:
+            numNods -= 1
+            nodNames.pop()
+            nodLocsX.pop(attNew)
+            nodLocsY.pop(attNew)
+            nodLocs.pop(attNew)  
+    
+    plt.axis([0.0,xLen, 0.0,yLen])
+    ax = plt.gca()
+    ax.set_autoscale_on(False)
+    plt.plot(nodLocsX,nodLocsY,'ko',defLoc[0],defLoc[1],'bx',attLoc[0],attLoc[1],'rx')
+    plt.show()
